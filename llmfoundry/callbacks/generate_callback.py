@@ -6,17 +6,19 @@ from typing import Any, List, Union, cast
 
 import torch
 import wandb
-from composer.core import Callback, State, get_precision_context
+from composer.core import Callback, Event, State, get_precision_context, Time, TimeUnit
 from composer.loggers import Logger, WandBLogger
+from composer.models import HuggingFaceModel
 from composer.utils import dist, ensure_tuple
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
+from composer.callbacks import checkpoint_periodically
 
 Tokenizer = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
 
 
 class Generate(Callback):
 
-    def __init__(self, prompts: List[str], batch_log_interval: int,
+    def __init__(self, prompts: List[str], interval: Union[str, int, Time],
                  **kwargs: Any):
         """Periodically log generations to wandb from a set of prompts.
 
@@ -33,22 +35,29 @@ class Generate(Callback):
 
         Args:
             prompts (List[str]): The list of prompts you would like to produce generations for
-            batch_log_interval (int): The interval (in batches) at which this callback runs
+            interval (Union[str, int, :class:`.Time`]): The interval describing how often checkpoints should be
+                saved. If an integer, it will be assumed to be in :attr:`.TimeUnit.EPOCH`\s.
+                Otherwise, the unit must be either :attr:`.TimeUnit.EPOCH`, :attr:`.TimeUnit.BATCH`,
+                :attr:`.TimeUnit.TOKEN`, or :attr:`.TimeUnit.SAMPLE`.
             kwargs: All kwargs well be passed along to the call to generate. This is for things like `do_sample`, `top_p`, etc
         """
         self.prompts = prompts
-        self.batch_log_interval = batch_log_interval
         self.generate_kwargs = kwargs
         self.wandb_logger = None
+        self.save_interval = checkpoint_periodically(interval)
 
     def init(self, state: State, logger: Logger):
+        assert isinstance(state.model, HuggingFaceModel)
         if dist.get_global_rank() == 0:
+            # raise Exception()
             for destination in ensure_tuple(logger.destinations):
                 if isinstance(destination, WandBLogger):
                     self.wandb_logger = destination
 
     def batch_checkpoint(self, state: State, logger: Logger):
+        print('HEY', checkpoint_periodically(state, Event.BATCH_CHECKPOINT))
         if (state.timestamp.batch.value % self.batch_log_interval) == 0:
+            raise Exception()
             self.generate(state, logger)
 
     def generate(self, state: State, logger: Logger):
