@@ -104,6 +104,17 @@ callbacks:
   lr_monitor: {}
   memory_monitor: {}
   runtime_estimator: {}
+  generate_callback:
+    prompts:
+      - The best way to cook is
+      - Why did the chicken
+    batch_log_interval: 5000
+    do_sample: true
+    max_new_tokens: 100
+    temperature: 1
+    top_k: 50
+    top_p: 0.95
+    use_cache: false
 
 # loggers:
 #   wandb: {}
