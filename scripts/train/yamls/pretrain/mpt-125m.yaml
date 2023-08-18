@@ -108,7 +108,11 @@ callbacks:
     prompts:
       - The best way to cook is
       - Why did the chicken
-    batch_log_interval: 5000
+      - If I were a
+      - I want to go to the
+      - Howdy neighbor
+    interval: 1ba
+    batch_size: 2
     do_sample: true
     max_new_tokens: 100
     temperature: 1
