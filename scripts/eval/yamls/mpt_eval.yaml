@@ -1,45 +1,63 @@
-max_seq_len: 1024
-tokenizer_name: EleutherAI/gpt-neox-20b
-seed: 1
-precision: amp_fp16
+integrations:
+- integration_type: git_repo
+  git_repo: mosaicml/llm-foundry
+  git_branch: main
+  pip_install: -e .[gpu]
 
+command: |
+  cd llm-foundry/scripts/
+  composer eval/eval.py /mnt/config/parameters.yaml
+image: mosaicml/pytorch:2.0.1_cu118-python3.10-ubuntu20.04
+name: mpt-eval
 
-models:
--
-  model_name: mpt_test
-  # Tokenizer
-  tokenizer:
-    name: ${tokenizer_name}
-    kwargs:
-      model_max_length: ${max_seq_len}
-  model:
-    name: mpt_causal_lm
-    init_device: meta
-    d_model: 768
-    n_heads: 12
-    n_layers: 12
-    expansion_ratio: 4
-    max_seq_len: ${max_seq_len}
-    vocab_size: 50368
-    attn_config:
-      attn_impl: triton
+compute:
+  gpus: 8
 
-  load_path: # Add your non-optional Composer checkpoint path here! (must not be empty)
+parameters:
+  max_seq_len: 1024
+  tokenizer_name: EleutherAI/gpt-neox-20b
+  seed: 1
+  precision: amp_fp16
+  run_name: mpt-eval
+  seed: 1
+  max_seq_len: 1024
 
-device_eval_batch_size: 16
+  models:
+  -
+    model_name: mpt_test
+    # Tokenizer
+    tokenizer:
+      name: ${tokenizer_name}
+      kwargs:
+        model_max_length: ${max_seq_len}
+    model:
+      name: mpt_causal_lm
+      init_device: meta
+      d_model: 768
+      n_heads: 12
+      n_layers: 12
+      expansion_ratio: 4
+      max_seq_len: ${max_seq_len}
+      vocab_size: 50368
+      attn_config:
+        attn_impl: triton
 
-# FSDP config for model sharding
-fsdp_config:
-  sharding_strategy: FULL_SHARD
-  mixed_precision: FULL
-  forward_prefetch: True
-  limit_all_gathers: True
+    load_path: # Add your non-optional Composer checkpoint path here! (must not be empty)
 
-icl_tasks:
--
-  label: jeopardy
-  dataset_uri: eval/local_data/world_knowledge/jeopardy_all.jsonl # ADD YOUR OWN DATASET URI
-  num_fewshot: [0]
-  icl_task_type: language_modeling
-  continuation_delimiter: "\nAnswer: " # this separates questions from answers
-  has_categories: true
+  device_eval_batch_size: 16
+
+  # FSDP config for model sharding
+  fsdp_config:
+    sharding_strategy: FULL_SHARD
+    mixed_precision: FULL
+    forward_prefetch: True
+    limit_all_gathers: True
+
+  icl_tasks:
+  -
+    label: jeopardy
+    dataset_uri: eval/local_data/world_knowledge/jeopardy_all.jsonl # ADD YOUR OWN DATASET URI
+    num_fewshot: [0]
+    icl_task_type: language_modeling
+    continuation_delimiter: "\nAnswer: " # this separates questions from answers
+    has_categories: true
