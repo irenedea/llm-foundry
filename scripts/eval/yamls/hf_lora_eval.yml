@@ -2,8 +2,8 @@
 
 integrations:
 - integration_type: git_repo
-  git_repo: mosaicml/llm-foundry
-  git_branch: main
+  git_repo: irenedea/llm-foundry
+  git_branch: eval-fix
   pip_install: -e .[gpu,peft]
 
 command: |

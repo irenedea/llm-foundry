@@ -24,7 +24,10 @@ def get_configs(cluster: str, wandb_entity: str,
         os.path.join(REGRESSIONS_DIR, 'hf_eval.yaml'))
 
     all_configs = [
-        hf_eval, hf_8bit_eval, hf_lora_eval, mpt_eval
+        # hf_eval, 
+        # hf_8bit_eval, 
+        # hf_lora_eval, 
+        mpt_eval,
     ]
 
     commit_hash = subprocess.check_output(['git', 'rev-parse',

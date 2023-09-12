@@ -31,7 +31,7 @@ parameters:
         model_max_length: ${max_seq_len}
     model:
       name: mpt_causal_lm
-      init_device: meta
+      init_device: mixed
       d_model: 768
       n_heads: 12
       n_layers: 12

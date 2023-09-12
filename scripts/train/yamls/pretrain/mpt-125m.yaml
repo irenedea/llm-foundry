@@ -35,7 +35,7 @@ train_loader:
     shuffle: true
     max_seq_len: ${max_seq_len}
     shuffle_seed: ${global_seed}
-  drop_last: true
+  drop_last: false
   num_workers: 8
 
 eval_loader:
