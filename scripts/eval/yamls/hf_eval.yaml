@@ -24,8 +24,6 @@ parameters:
   # otherwise, write a block for each model you want to test in the `models` section
 
   run_name: hf-eval
-  seed: 1
-  max_seq_len: 1024
 
   models:
   -

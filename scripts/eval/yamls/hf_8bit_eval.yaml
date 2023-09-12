@@ -3,7 +3,7 @@ integrations:
 - integration_type: git_repo
   git_repo: mosaicml/llm-foundry
   git_branch: main
-  pip_install: -e .[gpu]
+  pip_install: -e .[gpu,peft]
 
 command: |
   cd llm-foundry/scripts/
@@ -22,8 +22,6 @@ parameters:
   model_name_or_path: bigscience/bloom-1b7
 
   run_name: hf-8bit-eval
-  seed: 1
-  max_seq_len: 1024
 
   models:
   -

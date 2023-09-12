@@ -4,7 +4,7 @@ integrations:
 - integration_type: git_repo
   git_repo: mosaicml/llm-foundry
   git_branch: main
-  pip_install: -e .[gpu]
+  pip_install: -e .[gpu,peft]
 
 command: |
   cd llm-foundry/scripts/
@@ -23,12 +23,10 @@ parameters:
   # If you are using one model, put it here:
   model_name_or_path: EleutherAI/gpt-neo-125m
   # If you are using a seperated lora weight, put it here:
-  lora_id_or_path: nathan0/lora-gpt-neo-125m-alpaca
+  lora_id_or_path: edbeeching/gpt-neo-125M-imdb-lora
   # otherwise, write a block for each model you want to test in the `models` section
 
   run_name: hf-lora-eval
-  seed: 1
-  max_seq_len: 1024
 
   models:
   -

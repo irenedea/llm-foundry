@@ -2,7 +2,7 @@ integrations:
 - integration_type: git_repo
   git_repo: mosaicml/llm-foundry
   git_branch: main
-  pip_install: -e .[gpu]
+  pip_install: -e .[gpu,peft]
 
 command: |
   cd llm-foundry/scripts/
@@ -19,12 +19,11 @@ parameters:
   seed: 1
   precision: amp_fp16
   run_name: mpt-eval
-  seed: 1
-  max_seq_len: 1024
 
   models:
   -
     model_name: mpt_test
+
     # Tokenizer
     tokenizer:
       name: ${tokenizer_name}
@@ -42,7 +41,7 @@ parameters:
       attn_config:
         attn_impl: triton
 
-    load_path: # Add your non-optional Composer checkpoint path here! (must not be empty)
+    load_path: oci://mosaicml-internal-checkpoints/mpt-7b-final-checkpoints/base-foundry/base-original.pt # Add your non-optional Composer checkpoint path here! (must not be empty)
 
   device_eval_batch_size: 16
 
