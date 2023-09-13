@@ -32,9 +32,9 @@ parameters:
     model:
       name: mpt_causal_lm
       init_device: mixed
-      d_model: 768
-      n_heads: 12
-      n_layers: 12
+      d_model: 4096
+      n_heads: 32
+      n_layers: 32
       expansion_ratio: 4
       max_seq_len: ${max_seq_len}
       vocab_size: 50368
@@ -43,12 +43,12 @@ parameters:
 
     load_path: oci://mosaicml-internal-checkpoints/mpt-7b-final-checkpoints/base-foundry/base-original.pt # Add your non-optional Composer checkpoint path here! (must not be empty)
 
-  device_eval_batch_size: 16
+  device_eval_batch_size: 8
 
   # FSDP config for model sharding
   fsdp_config:
     sharding_strategy: FULL_SHARD
-    mixed_precision: FULL
+    mixed_precision: PURE
     forward_prefetch: True
     limit_all_gathers: True
 

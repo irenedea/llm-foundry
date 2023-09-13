@@ -1,6 +1,6 @@
 data_local: ./my-copy-c4
 data_remote: # If blank, files must be present in data_local
-max_seq_len: 2048
+max_seq_len: 1024
 global_seed: 17
 
 # Run Name
