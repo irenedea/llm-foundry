@@ -255,6 +255,7 @@ def build_text_dataloader(
         batch_size=device_batch_size,
         **cfg.dataset,
     )
+        
 
     collate_fn = transformers.DataCollatorForLanguageModeling(
         tokenizer=dataset.tokenizer,
@@ -267,6 +268,8 @@ def build_text_dataloader(
             base_collator=collate_fn,
             eos_token_id=eos_token_id,
             bos_token_id=bos_token_id)
+    
+    dataset = [dataset[i] for i in range(dataset.num_samples)]
 
     return DataLoader(
         dataset,
