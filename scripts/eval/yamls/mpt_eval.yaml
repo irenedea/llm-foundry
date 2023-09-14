@@ -12,6 +12,9 @@ name: mpt-eval
 
 compute:
   gpus: 8
+scheduling:
+  priority: low
+  preemtible: True
 
 parameters:
   max_seq_len: 1024
@@ -31,13 +34,13 @@ parameters:
         model_max_length: ${max_seq_len}
     model:
       name: mpt_causal_lm
-      init_device: mixed
+      init_device: cpu
       d_model: 4096
       n_heads: 32
       n_layers: 32
       expansion_ratio: 4
       max_seq_len: ${max_seq_len}
-      vocab_size: 50368
+      vocab_size: 50432
       attn_config:
         attn_impl: triton
 
