@@ -35,7 +35,7 @@ train_loader:
     shuffle: true
     max_seq_len: ${max_seq_len}
     shuffle_seed: ${global_seed}
-  drop_last: true
+  drop_last: false
   num_workers: 8
 
 eval_loader:
@@ -71,7 +71,7 @@ algorithms:
     clipping_threshold: 1.0
 
 max_duration: 1ep # ~ 2.5B tokens
-eval_interval: 1ep
+eval_interval: 2ep
 eval_first: false
 eval_subset_num_batches: -1
 global_train_batch_size: 256
