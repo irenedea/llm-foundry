@@ -1,5 +1,5 @@
-data_local: ./my-copy-c4
-data_remote: # If blank, files must be present in data_local
+data_local:
+data_remote: s3://mosaicml-internal-checkpoints-shared/irene/mds_script_test3/ # If blank, files must be present in data_local
 max_seq_len: 2048
 global_seed: 17
 
@@ -70,8 +70,8 @@ algorithms:
     clipping_type: norm
     clipping_threshold: 1.0
 
-max_duration: 4800ba # ~ 2.5B tokens
-eval_interval: 500ba
+max_duration: 1ep # ~ 2.5B tokens
+eval_interval: 1ep
 eval_first: false
 eval_subset_num_batches: -1
 global_train_batch_size: 256
