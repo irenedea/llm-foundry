@@ -41,8 +41,13 @@ parameters:
       expansion_ratio: 4
       max_seq_len: ${max_seq_len}
       vocab_size: 50432
+      no_bias: True
       attn_config:
         attn_impl: triton
+        attn_uses_sequence_id: true
+        alibi: True
+      init_config:
+        init_std: 0.02
 
     load_path: oci://mosaicml-internal-checkpoints/mpt-7b-final-checkpoints/base-foundry/base-original.pt # Add your non-optional Composer checkpoint path here! (must not be empty)
 
