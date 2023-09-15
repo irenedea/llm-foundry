@@ -38,7 +38,6 @@ parameters:
       emb_pdrop: 0
       embedding_fraction: 1.0
       init_device: meta
-      logit_scale: None
       max_seq_len: 2048
       model_type: mpt
       n_heads: 32
@@ -56,8 +55,6 @@ parameters:
         attn_pdrop: 0
         attn_impl: triton
         qk_ln: False
-        clip_qkv: None
-        softmax_scale: None
         prefix_lm: False
         attn_uses_sequence_id: True 
         alibi: True 
@@ -70,8 +67,6 @@ parameters:
         init_gain: 0
         init_std: 0.02
         init_div_is_residual: True
-        emb_init_std: None
-        emb_init_uniform_lim: None
 
     load_path: oci://mosaicml-internal-checkpoints/mpt-7b-final-checkpoints/base-foundry/base-original.pt # Add your non-optional Composer checkpoint path here! (must not be empty)
 
