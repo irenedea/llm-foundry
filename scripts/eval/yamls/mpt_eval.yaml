@@ -37,7 +37,7 @@ parameters:
       d_model: 4096
       emb_pdrop: 0
       embedding_fraction: 1.0
-      init_device: meta
+      init_device: mixed
       max_seq_len: 2048
       model_type: mpt
       n_heads: 32
