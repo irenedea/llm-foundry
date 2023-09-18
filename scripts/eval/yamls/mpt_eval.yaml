@@ -44,7 +44,7 @@ parameters:
       n_layers: 32
       no_bias: True
       resid_pdrop: 0
-      tokenizer_name: EleutherAI/gpt-neox-20b
+      tokenizer: EleutherAI/gpt-neox-20b
       transformers_version: 4.26.1
       use_cache: False
       verbose: 0
