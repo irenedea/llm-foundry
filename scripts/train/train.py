@@ -433,6 +433,7 @@ def main(cfg: DictConfig) -> Trainer:
     tokenizer_name = tokenizer_config['name']
     tokenizer_kwargs = tokenizer_config.get('kwargs', {})
     tokenizer = build_tokenizer(tokenizer_name, tokenizer_kwargs)
+    print('tokenizer!', tokenizer, type(tokenizer), tokenizer.fill_token)
 
     # Scheduler
     scheduler_name: str = scheduler_config.pop('name')
