@@ -173,7 +173,7 @@ def build_tokenizer(
     else:
         os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = '1'
         os.environ['TOKENIZERS_PARALLELISM'] = 'false'
-
+        print('kwargs', tokenizer_kwargs)
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name,
                                                   **tokenizer_kwargs)
 
