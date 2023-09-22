@@ -378,6 +378,7 @@ def _build_collate_fn(
     if packing_ratio == 'auto':
         packing_ratio = auto_packing_ratio(dataloader_cfg, tokenizer,
                                            device_batch_size)
+        print('chose auto packing-ratio!', packing_ratio)
 
     if packing_ratio == 1.0:
         return collate_fn, device_batch_size

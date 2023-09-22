@@ -97,6 +97,11 @@ class BinPackWrapper:
                       max_seq_len=self.max_seq_len,
                       pad_token_id=self.pad_token_id,
                       padding_side=self.padding_side)
+        padding_percent = 100 * (1 - self.efficiency)
+        waste_percent = 100 * self.waste
+        print('padding-percent', padding_percent, 'waste-percent', waste_percent)
+        if waste_percent > 0:
+            print('HEY!! WASTE PERCENT GREATER THAN 0')
         return batch
 
 
