@@ -313,6 +313,9 @@ def profile_packing(dataloader_cfg: DictConfig,
                             build_text_denoising_dataloader)
     from llmfoundry.data import build_text_dataloader
 
+    max_leftovers_to_keep = dataloader_cfg.dataset.get('max_leftovers_to_keep',
+                                                       None)
+
     # Turn off packing for the dataloader (we want raw, pre-packed examples)
     dataloader_cfg = copy.deepcopy(dataloader_cfg)
     dataloader_cfg.dataset.packing_ratio = None
@@ -455,9 +458,6 @@ if __name__ == '__main__':
     if 'train_loader' not in cfg:
         raise ValueError('config must define train_loader')
     dataloader_cfg = cfg.train_loader
-
-    max_leftovers_to_keep = dataloader_cfg.dataset.get('max_leftovers_to_keep',
-                                                       None)
 
     # build tokenizer
     if 'tokenizer' not in cfg:
