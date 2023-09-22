@@ -286,13 +286,12 @@ def auto_packing_ratio(dataloader_cfg: DictConfig,
                                         device_batch_size)
 
     # Obtain the maximum packing_ratio/minimum padding that has no waste.
-    i = 0
-    waste = 0
-    packing_ratio = 1
-    while i < len(profiling_results) and waste == 0:
-        packing_ratio, _, waste = profiling_results[i]
-        i += 1
-    return packing_ratio
+    prev_packing_ratio = 1
+    for packing_ratio, _, waste in profiling_results:
+        if waste > 0:
+            break
+        prev_packing_ratio = packing_ratio
+    return prev_packing_ratio
 
 
 def profile_packing(dataloader_cfg: DictConfig,
