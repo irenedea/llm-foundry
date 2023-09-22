@@ -47,7 +47,7 @@ fsdp_config:
   activation_checkpointing_reentrant: false
 global_seed: 17
 max_seq_len: 2048
-save_folder: s3://irene-test/finetuning/finetune-mpt-7b-7UuaqM/checkpoints
+save_folder: oci://irene-test/finetuning/finetune-mpt-7b-7UuaqM/checkpoints
 max_duration: 10ba
 progress_bar: false
 train_loader:
