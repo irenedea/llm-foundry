@@ -128,13 +128,13 @@ def get_object_names(input_folder: str) -> List[str]:
         _, _, folder_prefix = parse_uri(input_folder)
         names = [
             name for name in object_store.list_objects(folder_prefix)
-            if name.endswith('.txt')
+            if name.endswith('.py')
         ]
     else:
         # input_folder is a local folder
         names = [
             text_file for dirpath, _, _ in os.walk(input_folder)
-            for text_file in glob(os.path.join(dirpath, '*.txt'))
+            for text_file in glob(os.path.join(dirpath, '*.py'))
         ]
     # return names, sizes
     log.info(f'Found {len(names)} text files at {input_folder}')
