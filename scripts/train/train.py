@@ -641,7 +641,7 @@ def main(cfg: DictConfig) -> Trainer:
     print('Logging config')
     log_config(logged_cfg)
     torch.cuda.empty_cache()
-    gc.collect()
+    # gc.collect()
 
     # Eval first if requested
     if eval_first and trainer.state.timestamp.batch.value == 0:
