@@ -219,7 +219,7 @@ def main(cfg: DictConfig) -> Trainer:
 
     # Set CUDA lazy loading
     # This can save a bit of memory if not all modules are needed
-    cuda_load_lazy: bool = cfg.pop('cuda_load_lazy', True)
+    cuda_load_lazy: bool = cfg.pop('cuda_load_lazy', False)
     if cuda_load_lazy:
         os.environ['CUDA_MODULE_LOADING'] = 'LAZY'
 
@@ -641,7 +641,7 @@ def main(cfg: DictConfig) -> Trainer:
     print('Logging config')
     log_config(logged_cfg)
     torch.cuda.empty_cache()
-    # gc.collect()
+    gc.collect()
 
     # Eval first if requested
     if eval_first and trainer.state.timestamp.batch.value == 0:
