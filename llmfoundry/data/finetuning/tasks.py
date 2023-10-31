@@ -405,6 +405,14 @@ def dolly_preprocessing_function(inp: Dict) -> Dict[str, str]:
             f'Unable to extract prompt/response from {inp=}') from e
     return {'prompt': prompt, 'response': response}
 
+@dataset_constructor.register('glaiveai/glaive-code-assistant')
+def glaive_preprocessing_function(inp: Dict) -> Dict[str, str]:
+    """Format the already-split example."""
+    return {
+        'prompt': inp['answer'] + ':',
+        'response': inp['question'],
+    }
+
 
 @dataset_constructor.register('bigscience/P3')
 def p3_preprocessing_function(inp: Dict) -> Dict[str, str]:
