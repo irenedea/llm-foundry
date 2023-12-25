@@ -242,7 +242,7 @@ def apply_sequence_id(attn_bias: torch.Tensor, sequence_id: torch.LongTensor,
 
 class MPTPreTrainedModel(PreTrainedModel):
     config_class = MPTConfig
-    base_model_prefix = 'model'
+    base_model_prefix = 'transformer'
     _no_split_modules = ['MPTBlock']
 
 
