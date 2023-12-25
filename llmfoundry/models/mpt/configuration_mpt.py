@@ -21,6 +21,9 @@ from llmfoundry.models.layers.ffn import FFN_CLASS_REGISTRY  # type: ignore (see
 
 ffn_config_defaults: Dict = {
     'ffn_type': 'mptmlp',
+    'ffn_act_fn': {
+        'name': 'gelu',
+    },
 }
 
 init_config_defaults: Dict = {

@@ -41,6 +41,7 @@ attn_config_defaults: Dict = {
         'type': 'no_scaling',
         'factor': 1.0,
     },
+    'kv_n_heads': 16,
 }
 
 
@@ -82,6 +83,8 @@ class MPTBlock(nn.Module):
             'alibi_bias_max', 'rope', 'rope_theta', 'rope_impl',
             'rope_dail_config', 'rope_hf_config'
         }
+        if attn_config['attn_type'] != 'grouped_query_attention':
+            args_to_exclude_in_attn_class.add('kv_n_heads')
         attn_config_subset_for_attn_class = {
             k: v
             for k, v in attn_config.items()

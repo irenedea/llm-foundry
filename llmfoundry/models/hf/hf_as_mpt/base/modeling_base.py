@@ -7,14 +7,18 @@ from typing import Any, Generic, Type, TypeVar, Union
 import torch
 from transformers import PretrainedConfig, PreTrainedModel
 
+from llmfoundry.models.hf.hf_as_mpt.base.configuration_base import HFAsMPTConfig
+from llmfoundry.models.hf.hf_causal_lm import set_config_overrides
 from llmfoundry.models.mpt import MPTConfig, MPTForCausalLM
 
 BaseModelClass = TypeVar('BaseModelClass', bound=PreTrainedModel)
 BaseConfigClass = TypeVar('BaseConfigClass', bound=PretrainedConfig)
+BaseWrapperConfigClass = TypeVar('BaseWrapperConfigClass', bound=HFAsMPTConfig)
 
 
-class HFAsMPTForCausalLM(MPTForCausalLM, ABC, Generic[BaseModelClass,
-                                                      BaseConfigClass]):
+class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
+                         Generic[BaseModelClass, BaseConfigClass,
+                                 BaseWrapperConfigClass]):
 
     @classmethod
     @abstractmethod
@@ -24,6 +28,11 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC, Generic[BaseModelClass,
     @classmethod
     @abstractmethod
     def get_wrapped_config_class(cls) -> Type[BaseConfigClass]:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def get_wrapper_config_class(cls) -> Type[BaseWrapperConfigClass]:
         pass
 
     @classmethod
@@ -48,79 +57,22 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC, Generic[BaseModelClass,
     def get_n_layers(cls, config: Union[BaseConfigClass, MPTConfig]) -> int:
         pass
 
-    # def __init__(self, config: LlamaConfig):
-    #     mpt_overrides = {}
-    #     if hasattr(config, 'mpt_overrides'):
-    #         mpt_overrides = config.mpt_overrides
+    def __init__(self, config: BaseConfigClass):
+        user_overrides = {}
+        if hasattr(config, 'mpt_overrides'):
+            user_overrides = config.mpt_overrides
 
-    #     llama_as_mpt_config = LlamaAsMPTConfig(
-    #         original_config=config,
-    #         d_model=config.hidden_size,
-    #         n_heads=config.num_attention_heads,
-    #         n_layers=config.num_hidden_layers,
-    #         expansion_ratio=config.intermediate_size / config.hidden_size,
-    #         max_seq_len=config.max_position_embeddings,
-    #         vocab_size=config.vocab_size,
-    #         resid_pdrop=0.0,
-    #         emb_pdrop=0.0,
-    #         learned_pos_emb=False,
-    #         attn_config = {
-    #             'attn_type': 'grouped_query_attention',
-    #             'attn_pdrop': config.attention_dropout,
-    #             'attn_impl': 'flash',
-    #             'qk_ln': False,
-    #             'clip_qkv': None,
-    #             'softmax_scale': None,
-    #             'prefix_lm': False,
-    #             'attn_uses_sequence_id': False,
-    #             'sliding_window_size': -1,
-    #             'alibi': False,
-    #             'alibi_bias_max': 8,
-    #             'rope': True,
-    #             'rope_theta': config.rope_theta,
-    #             'rope_impl': 'hf',
-    #             'rope_dail_config': {
-    #                 'type': 'original',
-    #                 'pos_idx_in_fp32': True,
-    #                 'xpos_scale_base': 512,
-    #             },
-    #             'rope_hf_config': {
-    #                 'type': 'no_scaling',
-    #                 'factor': 1.0,
-    #             },
-    #             'kv_n_heads': config.num_key_value_heads,
-    #         },
-    #         ffn_config = {
-    #             'ffn_type': 'mptgeglu',
-    #             'ffn_act_fn': {
-    #                 'name': 'silu',
-    #             },
-    #         },
-    #         init_device='cpu',
-    #         logit_scale=None,
-    #         no_bias=True,
-    #         embedding_fraction=1.0,
-    #         norm_type='rmsnorm',
-    #         use_cache=False,
-    #         init_config = {
-    #             'name': 'kaiming_normal_',
-    #             'fan_mode': 'fan_in',
-    #             'init_nonlinearity': 'relu',
-    #             'init_div_is_residual': True,
-    #             'emb_init_std': None,
-    #             'emb_init_uniform_lim': None,
-    #             'init_std': None,
-    #             'init_gain': 0.0,
-    #         },
-    #         fc_type='torch',
-    #         tie_word_embeddings=False,
-    #         use_pad_tok_in_ffn=True,
-    #     )
-    #     # TODO: Prevent overriding of things that will not work when converting back to the
-    #     # original llama code
-    #     set_config_overrides(llama_as_mpt_config, mpt_overrides)
+        wrapper_config_class = self.get_wrapper_config_class()
 
-    #     super().__init__(llama_as_mpt_config)
+        hf_as_mpt_config = wrapper_config_class(original_config=config)
+
+        base_overrides = wrapper_config_class.get_base_mpt_overrides(config)
+        # TODO: Prevent overriding of things that will not work when converting back to the
+        # original llama code
+        set_config_overrides(hf_as_mpt_config, base_overrides)
+        set_config_overrides(hf_as_mpt_config, user_overrides)
+
+        super().__init__(hf_as_mpt_config)
 
     @classmethod
     def transform_mpt_sd(
