@@ -1,6 +1,8 @@
 # Copyright 2022 MosaicML LLM Foundry authors
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+import pathlib
 import torch
 import transformers
 from transformers import PreTrainedModel
@@ -41,7 +43,7 @@ def check_hf_model_equivalence(model1: PreTrainedModel,
     assert all(equals)
 
 
-def test_llama_from_save_pretrained():
+def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
     # Load the original llama
     original_llama = transformers.AutoModelForCausalLM.from_pretrained(
         'meta-llama/Llama-2-7b-hf', num_hidden_layers=2)
@@ -62,17 +64,19 @@ def test_llama_from_save_pretrained():
                       transformers.models.llama.modeling_llama.LlamaForCausalLM)
 
     # Save both llamas
-    original_llama.save_pretrained('original_llama')
-    patched_llama.save_pretrained('patched_llama')
+    original_dir = os.path.join(tmp_path, 'original_llama')
+    patched_dir = os.path.join(tmp_path, 'patched_llama')
+    original_llama.save_pretrained(original_dir)
+    patched_llama.save_pretrained(patched_dir)
 
     # Undo the patching
     MODEL_FOR_CAUSAL_LM_MAPPING._extra_content.pop(LlamaConfig)
 
     # Load the saved llamas back in
     reloaded_original_llama = transformers.AutoModelForCausalLM.from_pretrained(
-        'original_llama', num_hidden_layers=2)
+        original_dir, num_hidden_layers=2)
     reloaded_patched_llama = transformers.AutoModelForCausalLM.from_pretrained(
-        'patched_llama', num_hidden_layers=2)
+        patched_dir, num_hidden_layers=2)
 
     # Compare the saved llamas
     check_hf_model_equivalence(reloaded_original_llama, reloaded_patched_llama)
