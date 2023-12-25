@@ -1,9 +1,16 @@
-from llmfoundry.models.mpt import MPTConfig
-from transformers import PretrainedConfig
-from typing import Any
+# Copyright 2022 MosaicML LLM Foundry authors
+# SPDX-License-Identifier: Apache-2.0
+
 from abc import ABC, abstractmethod
+from typing import Any
+
+from transformers import PretrainedConfig
+
+from llmfoundry.models.mpt import MPTConfig
+
 
 class HFAsMPTConfig(MPTConfig, ABC):
+
     @property
     @abstractmethod
     def model_type(self) -> str:
