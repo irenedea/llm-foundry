@@ -6,7 +6,7 @@
 import logging
 import os
 import warnings
-from typing import Mapping, Union
+from typing import Any, Dict, Mapping, Union
 
 # required for loading a python model into composer
 import transformers
@@ -20,8 +20,8 @@ from composer.metrics.nlp import (InContextLearningCodeEvalAccuracy,
 from composer.utils import dist
 from omegaconf import DictConfig
 from torch import nn
-from transformers import (AutoConfig, AutoModelForCausalLM, PreTrainedModel,
-                          PreTrainedTokenizerBase)
+from transformers import (AutoConfig, AutoModelForCausalLM, PretrainedConfig,
+                          PreTrainedModel, PreTrainedTokenizerBase)
 
 from llmfoundry.models.hf.hf_fsdp import hf_get_init_device
 from llmfoundry.models.hf.model_wrapper import HuggingFaceModelWithZLoss
@@ -38,6 +38,31 @@ except ImportError:
 __all__ = ['ComposerHFCausalLM']
 
 log = logging.getLogger(__name__)
+
+
+def set_config_overrides(config: PretrainedConfig, overrides: Dict[str, Any]):
+    # set config overrides
+    for k, v in overrides.items():
+        if not hasattr(config, k):
+            raise ValueError(
+                f'config does not have attribute "{k}" to override ({k}: {v}).')
+
+        attr = getattr(config, k)
+        # attempt to disallow typos in nested configs
+        if isinstance(attr, Mapping):
+            extra_keys = [_k for _k in v.keys() if _k not in attr.keys()]
+            if extra_keys:
+                raise ValueError(
+                    f'Config dict override got unknown keys. ' +
+                    f'Extra keys: {extra_keys}. ' +
+                    f'Expected (a subset of) keys: {list(attr.keys())}.')
+            getattr(config, k).update(v)
+        # necessary case to allow for rope_scaling to be overriden in llama config
+        elif attr is None and isinstance(v, Mapping):
+            setattr(config, k, {})
+            getattr(config, k).update(v)
+        else:
+            setattr(config, k, v)
 
 
 class ComposerHFCausalLM(HuggingFaceModelWithZLoss):
@@ -125,31 +150,8 @@ class ComposerHFCausalLM(HuggingFaceModelWithZLoss):
                 _autoset_attn_implementation_monkeypatch)
 
             # set config overrides
-            for k, v in om_model_config.get('config_overrides', {}).items():
-                if not hasattr(config, k):
-                    raise ValueError(
-                        f'config does not have attribute "{k}" to override ({k}: {v}).'
-                    )
-
-                attr = getattr(config, k)
-                # attempt to disallow typos in nested configs
-                if isinstance(attr, Mapping):
-                    extra_keys = [
-                        _k for _k in v.keys() if _k not in attr.keys()
-                    ]
-                    if extra_keys:
-                        raise ValueError(
-                            f'Config dict override got unknown keys. ' +
-                            f'Extra keys: {extra_keys}. ' +
-                            f'Expected (a subset of) keys: {list(attr.keys())}.'
-                        )
-                    getattr(config, k).update(v)
-                # necessary case to allow for rope_scaling to be overriden in llama config
-                elif attr is None and isinstance(v, Mapping):
-                    setattr(config, k, {})
-                    getattr(config, k).update(v)
-                else:
-                    setattr(config, k, v)
+            set_config_overrides(config,
+                                 om_model_config.get('config_overrides', {}))
 
             load_in_8bit = om_model_config.get('load_in_8bit', False)
 
@@ -157,7 +159,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithZLoss):
             init_device = om_model_config.get('init_device', 'cpu')
 
             # Get the device we want to initialize, and use the
-            # reolved version to initialize the HF model
+            # resolved version to initialize the HF model
             resolved_init_device = hf_get_init_device(init_device)
 
             # We need to have all non-zero local ranks be not-pretrained
