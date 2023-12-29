@@ -81,7 +81,3 @@ def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
 
     # Compare the saved llamas
     check_hf_model_equivalence(reloaded_original_llama, reloaded_patched_llama)
-
-
-# Diff sizes
-# Init function same
