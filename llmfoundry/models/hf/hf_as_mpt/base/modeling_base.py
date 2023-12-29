@@ -24,29 +24,25 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
     @abstractmethod
     def get_wrapped_class(cls) -> Type[BaseModelClass]:
         return NotImplementedError(
-            'get_wrapped_class must be implemented by subclasses'
-        )
+            'get_wrapped_class must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
     def get_wrapped_config_class(cls) -> Type[BaseConfigClass]:
         return NotImplementedError(
-            'get_wrapped_config_class must be implemented by subclasses'
-        )
+            'get_wrapped_config_class must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
     def get_wrapper_config_class(cls) -> Type[BaseWrapperConfigClass]:
         return NotImplementedError(
-            'get_wrapper_config_class must be implemented by subclasses'
-        )
+            'get_wrapper_config_class must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
     def get_static_mapping(cls) -> dict[str, str]:
         return NotImplementedError(
-            'get_static_mapping must be implemented by subclasses'
-        )
+            'get_static_mapping must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
@@ -54,22 +50,19 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
         cls, config: Union[BaseConfigClass, MPTConfig]
     ) -> dict[str, list[tuple[str, int, int]]]:
         return NotImplementedError(
-            'get_unfuse_mapping must be implemented by subclasses'
-        )
+            'get_unfuse_mapping must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
     def get_refuse_mapping(cls) -> dict[tuple[str, ...], str]:
         return NotImplementedError(
-            'get_refuse_mapping must be implemented by subclasses'
-        )
+            'get_refuse_mapping must be implemented by subclasses')
 
     @classmethod
     @abstractmethod
     def get_n_layers(cls, config: Union[BaseConfigClass, MPTConfig]) -> int:
         return NotImplementedError(
-            'get_n_layers must be implemented by subclasses'
-        )
+            'get_n_layers must be implemented by subclasses')
 
     def __init__(self, config: BaseConfigClass):
         user_overrides = {}
