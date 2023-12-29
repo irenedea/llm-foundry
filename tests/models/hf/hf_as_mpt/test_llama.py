@@ -7,10 +7,10 @@ import pathlib
 import torch
 import transformers
 from transformers import PreTrainedModel
-from transformers.models.llama.configuration_llama import LlamaConfig
 
-from llmfoundry.models.hf.hf_as_mpt.llama.modeling_llama import \
-    LlamaAsMPTForCausalLM
+from llmfoundry.models.hf.hf_as_mpt import (LlamaAsMPTForCausalLM,
+                                            patch_hf_with_mpt,
+                                            undo_hf_with_mpt_patch)
 from llmfoundry.models.mpt import MPTForCausalLM, MPTModel
 from tests.a_scripts.inference.test_convert_composer_to_hf import \
     check_hf_model_equivalence
@@ -51,10 +51,7 @@ def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
         'meta-llama/Llama-2-7b-hf', num_hidden_layers=2)
 
     # Patch the llama implementation
-    from transformers.models.auto.modeling_auto import \
-        MODEL_FOR_CAUSAL_LM_MAPPING
-    MODEL_FOR_CAUSAL_LM_MAPPING._extra_content[
-        LlamaConfig] = LlamaAsMPTForCausalLM
+    patch_hf_with_mpt(original_llama.config.model_type)
 
     # Load the patched llama
     patched_llama = transformers.AutoModelForCausalLM.from_pretrained(
@@ -73,7 +70,7 @@ def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
     patched_llama.save_pretrained(patched_dir)
 
     # Undo the patching
-    MODEL_FOR_CAUSAL_LM_MAPPING._extra_content.pop(LlamaConfig)
+    undo_hf_with_mpt_patch(original_llama.config.model_type)
 
     # Load the saved llamas back in
     reloaded_original_llama = transformers.AutoModelForCausalLM.from_pretrained(
