@@ -3,12 +3,15 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Type, TypeVar, Union
+import logging
 
 import torch
 from transformers import PretrainedConfig, PreTrainedModel
 
 from llmfoundry.models.hf.hf_as_mpt.base.configuration_base import HFAsMPTConfig
 from llmfoundry.models.mpt import MPTConfig, MPTForCausalLM
+
+log = logging.getLogger(__name__)
 
 BaseModelClass = TypeVar('BaseModelClass', bound=PreTrainedModel)
 BaseConfigClass = TypeVar('BaseConfigClass', bound=PretrainedConfig)
@@ -148,6 +151,8 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
     def from_pretrained(cls: Type[BaseModelClass],
                         pretrained_model_name_or_path: str, *args: Any,
                         **kwargs: Any) -> Type[BaseModelClass]:
+        log.debug(
+            f'Loading {cls.__name__} from {pretrained_model_name_or_path}')
         state_dict = kwargs.pop('state_dict', None)
         loaded_model = cls.get_wrapped_class().from_pretrained(
             pretrained_model_name_or_path, *args, **kwargs)
