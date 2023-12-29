@@ -27,6 +27,7 @@ from llmfoundry.models.hf.hf_fsdp import hf_get_init_device
 from llmfoundry.models.hf.model_wrapper import HuggingFaceModelWithZLoss
 from llmfoundry.models.layers.attention import is_flash_v2_installed
 from llmfoundry.models.utils import init_empty_weights
+from llmfoundry.models.hf.hf_as_mpt import patch_hf_with_mpt
 
 try:
     from peft.peft_model import PeftModel
@@ -166,6 +167,10 @@ class ComposerHFCausalLM(HuggingFaceModelWithZLoss):
             # Rank 0 will still be pretrained, and distribute the weights appropriately
             if dist.get_local_rank() != 0 and init_device == 'mixed':
                 om_model_config.pretrained = False
+
+            # Monkeypatch replace the model code with MPT if requested
+            if om_model_config.get('use_mpt', False):
+                patch_hf_with_mpt(config.model_type)
 
             # If the HuggingFace model is coming from a local folder, Hugging Face copies the modules into the
             # transformers modules cache. On particular systems, this operation seems to cause contention between

@@ -8,7 +8,6 @@ import torch
 from transformers import PretrainedConfig, PreTrainedModel
 
 from llmfoundry.models.hf.hf_as_mpt.base.configuration_base import HFAsMPTConfig
-from llmfoundry.models.hf.hf_causal_lm import set_config_overrides
 from llmfoundry.models.mpt import MPTConfig, MPTForCausalLM
 
 BaseModelClass = TypeVar('BaseModelClass', bound=PreTrainedModel)
@@ -76,6 +75,7 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
         base_overrides = wrapper_config_class.get_base_mpt_overrides(config)
         # TODO: Prevent overriding of things that will not work when converting back to the
         # original llama code
+        from llmfoundry.models.hf.hf_causal_lm import set_config_overrides
         set_config_overrides(hf_as_mpt_config, base_overrides)
         set_config_overrides(hf_as_mpt_config, user_overrides)
 

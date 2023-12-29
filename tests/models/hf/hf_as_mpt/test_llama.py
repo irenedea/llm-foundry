@@ -12,8 +12,11 @@ from llmfoundry.models.hf.hf_as_mpt import (LlamaAsMPTForCausalLM,
                                             patch_hf_with_mpt,
                                             undo_hf_with_mpt_patch)
 from llmfoundry.models.mpt import MPTForCausalLM, MPTModel
+from llmfoundry.models.hf import ComposerHFCausalLM
 from tests.a_scripts.inference.test_convert_composer_to_hf import \
     check_hf_model_equivalence
+
+from omegaconf import DictConfig
 
 
 def check_hf_model_equivalence(model1: PreTrainedModel,
@@ -80,3 +83,20 @@ def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
 
     # Compare the saved llamas
     check_hf_model_equivalence(reloaded_original_llama, reloaded_patched_llama)
+
+def test_hf_causal_lm_creation():
+    hf_causal_lm = ComposerHFCausalLM(
+        DictConfig({
+            'pretrained_model_name_or_path': 'meta-llama/Llama-2-7b-hf',
+            'pretrained': False,
+            'init_device': 'cpu',
+            'use_mpt': True,
+            'config_overrides': {
+                'num_hidden_layers': 2,
+            },
+        }),
+        tokenizer=transformers.AutoTokenizer.from_pretrained(
+            'meta-llama/Llama-2-7b-hf'),
+    )
+
+    assert isinstance(hf_causal_lm.model, LlamaAsMPTForCausalLM)
