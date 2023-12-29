@@ -47,6 +47,11 @@ def check_hf_model_equivalence(model1: PreTrainedModel,
     equals = [torch.equal(p1[1], p2[1]) for p1, p2 in zip(p1, p2)]
     assert all(equals)
 
+    b1 = [(n, b.cpu()) for n, b in model1.named_buffers()]
+    b2 = [(n, b.cpu()) for n, b in model2.named_buffers()]
+    equals = [torch.equal(b1[1], b2[1]) for b1, b2 in zip(b1, b2)]
+    assert all(equals)
+
 
 def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
     # Load the original llama

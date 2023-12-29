@@ -37,7 +37,8 @@ class LlamaAsMPTForCausalLM(HFAsMPTForCausalLM):
             'norm_1': 'input_layernorm',
             'norm_2': 'post_attention_layernorm',
             'ffn': 'mlp',
-            'gate': 'gate_proj',
+            'gate': 'up_proj',
+            'up_proj': 'gate_proj',
             'out_proj': 'o_proj',
         }
 
