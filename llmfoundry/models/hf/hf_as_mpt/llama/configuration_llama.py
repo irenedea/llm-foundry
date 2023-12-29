@@ -40,11 +40,10 @@ class LlamaAsMPTConfig(HFAsMPTConfig):
                 'alibi_bias_max': 8,
                 'rope': True,
                 'rope_theta': config.rope_theta,
-                'rope_impl': 'hf',
+                'rope_impl': 'dail',
                 'rope_dail_config': {
                     'type': 'original',
                     'pos_idx_in_fp32': True,
-                    'xpos_scale_base': 512,
                 },
                 'rope_hf_config': {
                     'type': 'no_scaling',
@@ -62,7 +61,7 @@ class LlamaAsMPTConfig(HFAsMPTConfig):
             'logit_scale': None,
             'no_bias': True,
             'embedding_fraction': 1.0,
-            'norm_type': 'rmsnorm',
+            'norm_type': 'low_precision_rmsnorm',
             'use_cache': False,
             'init_config': {
                 'name': 'kaiming_normal_',
@@ -76,5 +75,5 @@ class LlamaAsMPTConfig(HFAsMPTConfig):
             },
             'fc_type': 'torch',
             'tie_word_embeddings': False,
-            'use_pad_tok_in_ffn': True,
+            'use_pad_tok_in_ffn': False,
         }
