@@ -12,7 +12,7 @@ from llmfoundry.models.hf.hf_as_mpt.llama.configuration_llama import \
 from llmfoundry.models.mpt import MPTConfig
 
 
-class LlamaAsMPT(HFAsMPTForCausalLM):
+class LlamaAsMPTForCausalLM(HFAsMPTForCausalLM):
 
     @classmethod
     def get_wrapped_class(cls) -> Type[LlamaForCausalLM]:

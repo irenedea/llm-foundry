@@ -9,7 +9,7 @@ import transformers
 from transformers import PreTrainedModel
 from transformers.models.llama.configuration_llama import LlamaConfig
 
-from llmfoundry.models.hf.hf_as_mpt.llama.modeling_llama import LlamaAsMPT
+from llmfoundry.models.hf.hf_as_mpt.llama.modeling_llama import LlamaAsMPTForCausalLM
 from llmfoundry.models.mpt import MPTForCausalLM, MPTModel
 from tests.a_scripts.inference.test_convert_composer_to_hf import \
     check_hf_model_equivalence
@@ -52,13 +52,13 @@ def test_llama_from_save_pretrained(tmp_path: pathlib.Path):
     # Patch the llama implementation
     from transformers.models.auto.modeling_auto import \
         MODEL_FOR_CAUSAL_LM_MAPPING
-    MODEL_FOR_CAUSAL_LM_MAPPING._extra_content[LlamaConfig] = LlamaAsMPT
+    MODEL_FOR_CAUSAL_LM_MAPPING._extra_content[LlamaConfig] = LlamaAsMPTForCausalLM
 
     # Load the patched llama
     patched_llama = transformers.AutoModelForCausalLM.from_pretrained(
         'meta-llama/Llama-2-7b-hf', num_hidden_layers=2)
 
-    assert isinstance(patched_llama, LlamaAsMPT)
+    assert isinstance(patched_llama, LlamaAsMPTForCausalLM)
     assert isinstance(patched_llama, MPTForCausalLM)
     assert isinstance(patched_llama.transformer, MPTModel)
     assert isinstance(original_llama,

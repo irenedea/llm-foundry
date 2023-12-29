@@ -23,39 +23,53 @@ class HFAsMPTForCausalLM(MPTForCausalLM, ABC,
     @classmethod
     @abstractmethod
     def get_wrapped_class(cls) -> Type[BaseModelClass]:
-        pass
+        return NotImplementedError(
+            'get_wrapped_class must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_wrapped_config_class(cls) -> Type[BaseConfigClass]:
-        pass
+        return NotImplementedError(
+            'get_wrapped_config_class must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_wrapper_config_class(cls) -> Type[BaseWrapperConfigClass]:
-        pass
+        return NotImplementedError(
+            'get_wrapper_config_class must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_static_mapping(cls) -> dict[str, str]:
-        pass
+        return NotImplementedError(
+            'get_static_mapping must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_unfuse_mapping(
         cls, config: Union[BaseConfigClass, MPTConfig]
     ) -> dict[str, list[tuple[str, int, int]]]:
-        pass
+        return NotImplementedError(
+            'get_unfuse_mapping must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_refuse_mapping(cls) -> dict[tuple[str, ...], str]:
-        pass
+        return NotImplementedError(
+            'get_refuse_mapping must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_n_layers(cls, config: Union[BaseConfigClass, MPTConfig]) -> int:
-        pass
+        return NotImplementedError(
+            'get_n_layers must be implemented by subclasses'
+        )
 
     def __init__(self, config: BaseConfigClass):
         user_overrides = {}

@@ -16,12 +16,16 @@ class HFAsMPTConfig(MPTConfig, ABC, Generic[BaseConfigClass]):
     @property
     @abstractmethod
     def model_type(self) -> str:
-        pass
+        return NotImplementedError(
+            'model_type must be implemented by subclasses'
+        )
 
     @classmethod
     @abstractmethod
     def get_base_mpt_overrides(cls, config: BaseConfigClass) -> dict[str, Any]:
-        pass
+        return NotImplementedError(
+            'get_base_mpt_overrides must be implemented by subclasses'
+        )
 
     def __init__(self, original_config: BaseConfigClass, **kwargs: Any):
         self.original_config = original_config
