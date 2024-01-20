@@ -41,6 +41,8 @@ def merge_shard_groups(root: str) -> None:
     infos = []
     for subdir in subdirs:
         index_filename = os.path.join(subdir, 'index.json')
+        if not os.path.isfile(index_filename):
+            continue
         with open(index_filename) as index_file:
             obj = json.load(index_file)
         for info in obj['shards']:
