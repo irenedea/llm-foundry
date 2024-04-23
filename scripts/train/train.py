@@ -611,6 +611,7 @@ def main(cfg: DictConfig) -> Trainer:
         dist_timeout=dist_timeout,
         profiler=profiler,
         compile_config=compile_config,
+        deterministic_mode=True,
     )
 
     if should_log_config:
