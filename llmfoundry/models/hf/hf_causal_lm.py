@@ -148,7 +148,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
         )
 
 
-        # model = self.transform_model(model)
+        model = self.transform_model(model)
 
         ComposerHFCausalLM.prepare_inner_model(model, init_device)
 
