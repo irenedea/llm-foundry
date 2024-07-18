@@ -485,13 +485,15 @@ class HuggingFaceCheckpointer(Callback):
                 # model, only the adapter weights.
                 active_adapter = original_model.active_adapter
                 base_model = original_model.get_base_model()
-                new_base_model_instance = type(base_model)(new_config)
-
-                new_model_instance = type(original_model)(
-                    new_base_model_instance,
-                    original_model.peft_config[active_adapter],
-                )
-                new_model_instance.to(dtype=self.dtype)
+                
+                with init_empty_weights():
+                    new_base_model_instance = type(base_model)(new_config)
+                    
+                    new_model_instance = type(original_model)(
+                        new_base_model_instance,
+                        original_model.peft_config[active_adapter],
+                    )
+                    new_model_instance.to(dtype=self.dtype)
             else:
                 # First create the model instance on meta device to avoid the
                 # initialization cost.
