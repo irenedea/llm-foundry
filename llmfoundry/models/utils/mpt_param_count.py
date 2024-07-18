@@ -166,12 +166,17 @@ def mpt_get_active_params(mpt_model) -> int:  # type: ignore
         An int for the active number of parameters in this MPT model.
     """
     if mpt_model.config.ffn_config['ffn_type'] in ffns_with_megablocks:
+        print('MEGABLOCKS ACTIVE PARAMS')
         params = megablocks_n_active_params(mpt_model)
     else:
+        print('JUST SUMMING')
         params = sum(p.numel() for p in mpt_model.parameters())
+    print('PARAMS SO FAR:', params)
     if not mpt_model.model.transformer.config.tie_word_embeddings:
+        print('NOT TIE WORD EMBEDDINGS')
         # Embedding layers are lookup tables, therefore are not counted in the FLOP computation
         params -= _dtensor_safe_check_numel(
             mpt_model.model.transformer.wte.weight,
         )
+    print('FINAL PARAMS:', params)
     return params

@@ -155,15 +155,21 @@ def validate_config(train_config: TrainConfig):
 
 def _log_num_params(model: ComposerModel, logged_cfg: Dict[str, Any]):
     # Log number of parameters
+    print('logging number of params!!', type(model), type(model.model))
     if hasattr(model, 'n_total_params'):
+        print('MODEL HAS N TOTAL PARAMS', model.n_total_params)
         n_params = model.n_total_params
         n_trainable_params = n_params  # TODO: we currently assume all parameters are trainable.
     else:
+        print('SUMMING!!!')
         n_params = sum(p.numel() for p in model.parameters())
         n_trainable_params = sum(
             p.numel() for p in model.parameters() if p.requires_grad
         )
+        print('GOT:', n_params, n_trainable_params)
     if hasattr(model, 'n_active_params'):
+        print('MODEL HAS N ACTIVE PARAMS', model.n_active_params)
+
         n_active_params = model.n_active_params
     else:
         n_active_params = n_params
