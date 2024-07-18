@@ -395,7 +395,8 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
                 pretrained_lora_id_or_path,
             )
         
-        ComposerHFCausalLM.prepare_inner_model(model, init_device)
+        if prepare_for_fsdp:
+            ComposerHFCausalLM.prepare_inner_model(model, init_device)
 
         return model
 
