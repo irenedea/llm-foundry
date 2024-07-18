@@ -37,6 +37,7 @@ from llmfoundry.models.hf.model_wrapper import HuggingFaceModelWithFSDP
 from llmfoundry.models.layers.attention import is_flash_v2_installed
 from llmfoundry.models.utils import init_empty_weights
 from llmfoundry.utils.config_utils import get_hf_config_value
+from transformers.utils.generic import ModelOutput
 
 if TYPE_CHECKING:
     from peft import PeftConfig, PeftModel
@@ -147,10 +148,9 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
         )
 
 
-        model = self.transform_model(model)
+        # model = self.transform_model(model)
 
         ComposerHFCausalLM.prepare_inner_model(model, init_device)
-
 
         train_metrics, eval_metrics = ComposerHFCausalLM.build_metrics(
             use_train_metrics=use_train_metrics,
@@ -398,6 +398,17 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
             )
 
         return model
+
+    def loss(self, outputs: ModelOutput, batch: Mapping):
+        loss = super().loss(outputs, batch)
+        if 'sample_weighing_factor' in batch:
+            if batch['sample_weighing_factor'].shape[0] > 1:
+                raise ValueError(
+                    'Sample weighing factor is not supported when batch["sample_weighing_factor"].shape[0] > 1.',
+                )
+            return loss * batch['sample_weighing_factor'][0].item()
+        return loss
+
 
     @staticmethod
     def _get_peft_config(peft_config_dict: Dict[str, Any]) -> 'PeftConfig':
