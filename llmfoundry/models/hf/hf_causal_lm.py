@@ -150,8 +150,6 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
 
         model = self.transform_model(model)
 
-        ComposerHFCausalLM.prepare_inner_model(model, init_device)
-
         train_metrics, eval_metrics = ComposerHFCausalLM.build_metrics(
             use_train_metrics=use_train_metrics,
             additional_train_metrics=additional_train_metrics,
@@ -396,19 +394,21 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
                 model,
                 pretrained_lora_id_or_path,
             )
+        
+        ComposerHFCausalLM.prepare_inner_model(model, init_device)
 
         return model
 
-    def loss(self, outputs: ModelOutput, batch: Mapping):
-        loss = super().loss(outputs, batch)
-        if 'sample_weighing_factor' in batch:
-            print('SAMPLE WEIGHING FACTOR IS IN BATCH!!!')
-            if batch['sample_weighing_factor'].shape[0] > 1:
-                raise ValueError(
-                    'Sample weighing factor is not supported when batch["sample_weighing_factor"].shape[0] > 1.',
-                )
-            return loss * batch['sample_weighing_factor'][0].item()
-        return loss
+    # def loss(self, outputs: ModelOutput, batch: Mapping):
+    #     loss = super().loss(outputs, batch)
+    #     if 'sample_weighing_factor' in batch:
+    #         print('SAMPLE WEIGHING FACTOR IS IN BATCH!!!')
+    #         if batch['sample_weighing_factor'].shape[0] > 1:
+    #             raise ValueError(
+    #                 'Sample weighing factor is not supported when batch["sample_weighing_factor"].shape[0] > 1.',
+    #             )
+    #         return loss * batch['sample_weighing_factor'][0].item()
+    #     return loss
 
 
     @staticmethod
