@@ -134,7 +134,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
 
         config_overrides = config_overrides or {}
 
-        model = ComposerHFCausalLM.build_inner_model(
+        model = self.build_inner_model(
             pretrained_model_name_or_path=pretrained_model_name_or_path,
             pretrained_lora_id_or_path=pretrained_lora_id_or_path,
             trust_remote_code=trust_remote_code,
@@ -147,8 +147,6 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
             prepare_for_fsdp=True,
         )
 
-
-        model = self.transform_model(model)
 
         train_metrics, eval_metrics = ComposerHFCausalLM.build_metrics(
             use_train_metrics=use_train_metrics,
@@ -176,17 +174,6 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
             peft_config=peft_config_object,
             should_save_peft_only=should_save_peft_only,
         )
-
-    def transform_model(self, model: PreTrainedModel) -> PreTrainedModel:
-        """Transforms the HF model.
-
-        Args:
-            model (PreTrainedModel): The model to transform.
-
-        Returns:
-            PreTrainedModel: The transformed model.
-        """
-        return model
 
     @staticmethod
     def build_metrics(
@@ -221,8 +208,19 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
 
         return train_metrics, eval_metrics
 
-    @staticmethod
+    def initialize_model_from_config(self, config: PretrainedConfig, trust_remote_code: bool) -> PreTrainedModel:
+        """Initializes the model from a configuration.
+
+        Args:
+            config (PretrainedConfig): The configuration to use for the model.
+
+        Returns:
+            PreTrainedModel: The initialized model.
+        """
+        return AutoModelForCausalLM.from_config(config, trust_remote_code=trust_remote_code)
+
     def build_inner_model(
+        self,
         pretrained_model_name_or_path: str,
         pretrained_lora_id_or_path: Optional[str],
         trust_remote_code: bool,
@@ -328,7 +326,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
                         )
             else:
                 with init_empty_weights(include_buffers=False):
-                    AutoModelForCausalLM.from_config(
+                    self.initialize_model_from_config(
                         config,
                         trust_remote_code=trust_remote_code,
                     )
@@ -346,7 +344,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
                     config=config,
                 )
             else:
-                model = AutoModelForCausalLM.from_config(
+                model = self.initialize_model_from_config(
                     config,
                     trust_remote_code=trust_remote_code,
                 )
@@ -356,7 +354,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
                     'Setting cfg.pretrained=True is not supported when init_device="meta".',
                 )
             with init_empty_weights(include_buffers=False):
-                model = AutoModelForCausalLM.from_config(
+                model = self.initialize_model_from_config(
                     config,
                     trust_remote_code=trust_remote_code,
                 )
