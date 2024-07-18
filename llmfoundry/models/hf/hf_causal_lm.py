@@ -402,6 +402,7 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
     def loss(self, outputs: ModelOutput, batch: Mapping):
         loss = super().loss(outputs, batch)
         if 'sample_weighing_factor' in batch:
+            print('SAMPLE WEIGHING FACTOR IS IN BATCH!!!')
             if batch['sample_weighing_factor'].shape[0] > 1:
                 raise ValueError(
                     'Sample weighing factor is not supported when batch["sample_weighing_factor"].shape[0] > 1.',
