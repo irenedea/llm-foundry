@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
+import psutil
 import torch
 import torch.nn as nn
 from composer.core import Callback, Event, Precision, State, Time, TimeUnit
@@ -394,6 +395,12 @@ class HuggingFaceCheckpointer(Callback):
 
         gc_cuda()
 
+        # you can have the percentage of used RAM
+        log.debug(f'used memory {psutil.virtual_memory().percent}')
+        
+        # you can calculate percentage of available memory
+        log.debug(f'available memory {psutil.virtual_memory().available * 100 / psutil.virtual_memory().total}')
+
         if state.is_model_ddp:
             composer_model = state.model.module
             original_model: PreTrainedModel = state.model.module.model
@@ -438,9 +445,6 @@ class HuggingFaceCheckpointer(Callback):
                         else:
                             state_dict[fqn] = None
                         del tensor
-                    else:
-                        log.debug(f'Not a DTensor {fqn}')
-                    gc_cuda()
                     
                 if dist.get_global_rank() != 0:
                     for fqn in dtensor_fqns:
@@ -480,6 +484,15 @@ class HuggingFaceCheckpointer(Callback):
         #         state_dict[k] = v.to(dtype=self.dtype)
 
         new_model_instance = None  # Need this for pyright because variable could be unbound
+
+        gc_cuda()
+
+
+        # you can have the percentage of used RAM
+        log.debug(f'after gather state dict used memory {psutil.virtual_memory().percent}')
+        
+        # you can calculate percentage of available memory
+        log.debug(f'after gather state dict available memory {psutil.virtual_memory().available * 100 / psutil.virtual_memory().total}')
 
         if dist.get_global_rank() == 0:
             log.debug('Saving Hugging Face checkpoint in global rank 0')
