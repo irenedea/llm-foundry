@@ -446,8 +446,11 @@ class HuggingFaceCheckpointer(Callback):
                         del tensor
                     
                 if dist.get_global_rank() != 0:
-                    for fqn in dtensor_fqns:
-                        del state_dict[fqn]
+                    state_dict = {}
+                log.debug(f'memory before gc on module {psutil.virtual_memory()}')
+                gc_cuda()
+                log.debug(f'memory after gc on module {psutil.virtual_memory()}')
+
                 return state_dict
 
             hooks = []
