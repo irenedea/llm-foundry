@@ -148,8 +148,6 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
             prepare_for_fsdp=True,
         )
 
-        model = self.transform_model(model)
-
 
         train_metrics, eval_metrics = ComposerHFCausalLM.build_metrics(
             use_train_metrics=use_train_metrics,
