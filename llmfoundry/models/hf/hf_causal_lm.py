@@ -390,6 +390,8 @@ class ComposerHFCausalLM(HuggingFaceModelWithFSDP):
 
         if dist.get_local_rank() == 0:
             os.remove(signal_file_path)
+        
+        model = self.transform_model(model)
 
         # Hugging Face's weight tying does not succeed if the model is inited on meta device
         # so we manually apply the weight tying here
