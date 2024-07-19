@@ -393,14 +393,12 @@ class HuggingFaceCheckpointer(Callback):
         log.debug('Gathering state dict')
         from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 
+        log.debug(f'memory before first gc {psutil.virtual_memory()}')
+
         gc_cuda()
 
-        # you can have the percentage of used RAM
-        log.debug(f'used memory {psutil.virtual_memory().percent}')
+        log.debug(f'memory {psutil.virtual_memory()}')
         
-        # you can calculate percentage of available memory
-        log.debug(f'available memory {psutil.virtual_memory().available * 100 / psutil.virtual_memory().total}')
-
         if state.is_model_ddp:
             composer_model = state.model.module
             original_model: PreTrainedModel = state.model.module.model
@@ -485,14 +483,14 @@ class HuggingFaceCheckpointer(Callback):
 
         new_model_instance = None  # Need this for pyright because variable could be unbound
 
+        log.debug(f'memory after gather {psutil.virtual_memory()}')
+
+
         gc_cuda()
 
 
         # you can have the percentage of used RAM
-        log.debug(f'after gather state dict used memory {psutil.virtual_memory().percent}')
-        
-        # you can calculate percentage of available memory
-        log.debug(f'after gather state dict available memory {psutil.virtual_memory().available * 100 / psutil.virtual_memory().total}')
+        log.debug(f'memory after gather after gc {psutil.virtual_memory()}')
 
         if dist.get_global_rank() == 0:
             log.debug('Saving Hugging Face checkpoint in global rank 0')
