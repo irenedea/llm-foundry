@@ -438,6 +438,7 @@ class HuggingFaceCheckpointer(Callback):
                         tensor = tensor.full_tensor()
                         if dist.get_global_rank() == 0:
                             if cpu_offload:
+                                log.debug('Offloading tensor to CPU')
                                 tensor = tensor.to(dtype=self.dtype, device=torch.device('cpu'))
                             state_dict[fqn] = tensor
                         else:
