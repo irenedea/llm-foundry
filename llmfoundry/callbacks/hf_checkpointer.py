@@ -439,12 +439,14 @@ class HuggingFaceCheckpointer(Callback):
                         if dist.get_global_rank() == 0:
                             if cpu_offload:
                                 log.debug('Offloading tensor to CPU')
-                                tensor = tensor.to(dtype=self.dtype, device=torch.device('cpu'))
+                                tensor = tensor.cpu()
                             state_dict[fqn] = tensor
                         else:
                             state_dict[fqn] = None
                         del tensor
-                    
+                    if isinstance(state_dict[fqn], torch.Tensor):
+                        state_dict[fqn] = state_dict[fqn].to(dtype=self.dtype)
+        
                 if dist.get_global_rank() != 0:
                     state_dict = {}
                 log.debug(f'memory before gc on module {psutil.virtual_memory()}')
