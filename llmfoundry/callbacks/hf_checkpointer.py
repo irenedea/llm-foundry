@@ -559,7 +559,7 @@ class HuggingFaceCheckpointer(Callback):
                 original_tokenizer.save_pretrained(temp_save_dir)
 
             # Only need to edit files for MPT because it has custom code
-            if original_model.config.model_type == 'mpt':
+            if new_model_instance.config.model_type == 'mpt':
                 log.debug('Editing MPT files for HuggingFace compatibility')
                 edit_files_for_hf_compatibility(
                     temp_save_dir,
