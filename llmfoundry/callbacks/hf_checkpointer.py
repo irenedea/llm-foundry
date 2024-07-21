@@ -42,7 +42,6 @@ from llmfoundry.models.utils import init_empty_weights
 from llmfoundry.utils.huggingface_hub_utils import \
     edit_files_for_hf_compatibility
 
-from llmfoundry.callbacks.scheduled_gc_callback import gc_cuda
 
 try:
     import transformer_engine.pytorch as te
@@ -395,8 +394,6 @@ class HuggingFaceCheckpointer(Callback):
 
         log.debug(f'memory before first gc {psutil.virtual_memory()}')
 
-        gc_cuda()
-
         log.debug(f'memory {psutil.virtual_memory()}')
         
         if state.is_model_ddp:
@@ -491,8 +488,6 @@ class HuggingFaceCheckpointer(Callback):
 
         log.debug(f'memory after gather {psutil.virtual_memory()}')
 
-
-        gc_cuda()
 
 
         # you can have the percentage of used RAM
