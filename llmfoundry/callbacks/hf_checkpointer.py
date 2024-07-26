@@ -468,6 +468,9 @@ class HuggingFaceCheckpointer(Callback):
         hooks = []
         for _, module in state_dict_model.named_modules():
             hooks.append(module._register_state_dict_hook(tensor_hook),)
+        
+        log.debug('Registered hook')
+
 
         state_dict = get_model_state_dict(
             state_dict_model,
@@ -479,6 +482,7 @@ class HuggingFaceCheckpointer(Callback):
         for hook in hooks:
             hook.remove()
 
+        log.debug('Got model state dict')
         gc_cuda()
 
         new_model_instance = None  # Need this for pyright because variable could be unbound
@@ -562,7 +566,11 @@ class HuggingFaceCheckpointer(Callback):
                         overwrite=self.overwrite,
                     )
 
+        log.debug('At barrier')
+
         dist.barrier()
+
+        log.debug('past barrier')
 
         if dist.get_global_rank() == 0:
             if self.mlflow_registered_model_name and self._is_last_batch(state):
@@ -648,4 +656,5 @@ class HuggingFaceCheckpointer(Callback):
                 # Clean up the temporary directory if we don't need to register to mlflow.
                 if use_temp_dir:
                     shutil.rmtree(temp_save_dir)
+        log.debug('At second barrier')
         dist.barrier()
