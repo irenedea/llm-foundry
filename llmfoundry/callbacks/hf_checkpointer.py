@@ -45,6 +45,8 @@ from llmfoundry.models.utils import init_empty_weights
 from llmfoundry.utils.huggingface_hub_utils import \
     edit_files_for_hf_compatibility
 
+from llmfoundry.callbacks.scheduled_gc_callback import gc_cuda
+
 try:
     import transformer_engine.pytorch as te
     is_te_imported = True
@@ -476,6 +478,8 @@ class HuggingFaceCheckpointer(Callback):
         )
         for hook in hooks:
             hook.remove()
+
+        gc_cuda()
 
         new_model_instance = None  # Need this for pyright because variable could be unbound
 
