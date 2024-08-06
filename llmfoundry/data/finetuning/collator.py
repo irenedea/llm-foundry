@@ -3,7 +3,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 import torch
 from transformers import PreTrainedTokenizer, PreTrainedTokenizerFast
@@ -320,24 +320,28 @@ class Seq2SeqFinetuningCollator:
     ) -> Dict[str, torch.Tensor]:
         # Steps explained in comments
         processed_examples = []
-        for example in examples:
-            input_ids, labels = stitch_turns_decoder_only(
+
+
+        iids_and_labels = [ stitch_turns_decoder_only(
                 example_turns=example['turns'],
                 target_prompts=self.target_prompts,
                 target_responses=self.target_responses,
                 eos_token_id=self.tokenizer.eos_token_id,
-            )
+            ) for example in examples] 
+        
+        max_seq_len = max([len(iids) for iids, _ in iids_and_labels])
 
+        for input_ids, labels in iids_and_labels:
             orig_size = len(input_ids)
             # We may need to truncate the input_ids / labels in order to maintain max_seq_len
-            if orig_size > self.max_seq_len:
-                input_ids = input_ids[:self.max_seq_len]
-                labels = labels[:self.max_seq_len]
+            if orig_size > max_seq_len:
+                input_ids = input_ids[:max_seq_len]
+                labels = labels[:max_seq_len]
 
                 # Check to make sure there are still loss-generating tokens. Error if not.
                 if len([l for l in labels if l != _HF_IGNORE_INDEX]) == 0:
                     raise ValueError(
-                        f'Truncating to max_seq_len={self.max_seq_len} has removed all loss-generating tokens. ' +\
+                        f'Truncating to max_seq_len={max_seq_len} has removed all loss-generating tokens. ' +\
                         f'Pre-truncation sequence length was {orig_size}. ' +\
                         'This sample should have been filtered out before reaching the collator. If using ' +\
                         'pre-tokenized streaming data, this may have resulted from using different ' +\
@@ -348,7 +352,7 @@ class Seq2SeqFinetuningCollator:
                 # Still issue a warning when truncating
                 if not self._warned_truncated:
                     warnings.warn(
-                        f'Truncating sequence of length={orig_size} to fit max_seq_len={self.max_seq_len}. ' +\
+                        f'Truncating sequence of length={orig_size} to fit max_seq_len={max_seq_len}. ' +\
                         f'If truncation is a problem, consider increasing max_seq_len.',
                     )
                     self._warned_truncated = True
@@ -358,7 +362,7 @@ class Seq2SeqFinetuningCollator:
             # Annoyingly, we need to pad everything but input_ids
             # and attention_mask ourselves
             n_total = len(input_ids)
-            i_pad = [_HF_IGNORE_INDEX] * (self.max_seq_len - n_total)
+            i_pad = [_HF_IGNORE_INDEX] * (max_seq_len - n_total)
             if self.tokenizer.padding_side == 'left':
                 labels = i_pad + labels
             else:
@@ -373,10 +377,11 @@ class Seq2SeqFinetuningCollator:
 
             processed_examples.append(processed_example)
 
+
         batch = self.tokenizer.pad(
             processed_examples,
             padding='max_length',
-            max_length=self.max_seq_len,
+            max_length=max_seq_len,
             return_tensors='pt',
         )
 

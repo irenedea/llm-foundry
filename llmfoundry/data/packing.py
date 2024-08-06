@@ -161,19 +161,19 @@ def _combine_in_place(
     example: Dict[str, torch.Tensor],
     add_on: Dict[str, torch.Tensor],
 ) -> Dict[str, torch.Tensor]:
-    if 'labels' in add_on:
-        # Prevents the last token in example from being trained to
-        # predict the first token in add_on, which would make no sense.
-        add_on['labels'][0] = -100
+    # if 'labels' in add_on:
+    #     # Prevents the last token in example from being trained to
+    #     # predict the first token in add_on, which would make no sense.
+    #     add_on['labels'][0] = -100
 
-    for k in example.keys():
-        if k == 'sequence_id':
-            example[k] = torch.cat([
-                example[k],
-                add_on[k] + 1 + torch.max(example[k]),
-            ])
-        else:
-            example[k] = torch.cat([example[k], add_on[k]])
+    # for k in example.keys():
+    #     if k == 'sequence_id':
+    #         example[k] = torch.cat([
+    #             example[k],
+    #             add_on[k] + 1 + torch.max(example[k]),
+    #         ])
+    #     else:
+    #         example[k] = torch.cat([example[k], add_on[k]])
     return example
 
 
@@ -286,19 +286,20 @@ def _repad(
 ) -> Dict[str, torch.Tensor]:
 
     def pad_tensor(tensor: torch.Tensor, pad_value: int):
-        if len(tensor) == max_seq_len:
-            return tensor
-        t = torch.full((max_seq_len,),
-                       pad_value,
-                       dtype=tensor.dtype,
-                       device=tensor.device)
-        if padding_side == 'left':
-            t[-len(tensor):] = tensor
-        elif padding_side == 'right':
-            t[:len(tensor)] = tensor
-        else:
-            raise ValueError(f'Unknown {padding_side=}')
-        return t
+        return tensor
+        # if len(tensor) == max_seq_len:
+        #     return tensor
+        # t = torch.full((max_seq_len,),
+        #                pad_value,
+        #                dtype=tensor.dtype,
+        #                device=tensor.device)
+        # if padding_side == 'left':
+        #     t[-len(tensor):] = tensor
+        # elif padding_side == 'right':
+        #     t[:len(tensor)] = tensor
+        # else:
+        #     raise ValueError(f'Unknown {padding_side=}')
+        # return t
 
     pad_vals = {
         'input_ids': pad_token_id,
