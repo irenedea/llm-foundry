@@ -58,6 +58,7 @@ from llmfoundry.utils.exceptions import (
     TrainDataLoaderLocation,
 )
 from llmfoundry.utils.registry_utils import import_file
+from torch.distributed.checkpoint.planner import ReadItem, SavePlan, WriteItem
 
 log = logging.getLogger(__name__)
 
@@ -258,30 +259,60 @@ def train(cfg: DictConfig) -> Trainer:
     # Optional fsdp data, fine-tuning, and eval configs
     fsdp_config: Optional[dict[str, Any]] = train_cfg.fsdp_config
 
-    if fsdp_config is not None:
-        if 'load_planner' in fsdp_config:
-            load_planners = list(fsdp_config['load_planner'].items())
-            if len(load_planners) > 1:
-                raise ValueError(
-                    'Only one load planner can be specified in the config.',
-                )
-            load_planner_name, load_planner_config = load_planners[0]
-            fsdp_config['load_planner'] = build_load_planner(
-                load_planner_name,
-                **load_planner_config,
-            )
 
-        if 'save_planner' in fsdp_config:
-            save_planners = list(fsdp_config['save_planner'].items())
-            if len(save_planners) > 1:
-                raise ValueError(
-                    'Only one save planner can be specified in the config.',
-                )
-            save_planner_name, save_planner_config = save_planners[0]
-            fsdp_config['save_planner'] = build_save_planner(
-                save_planner_name,
-                **save_planner_config,
-            )
+    from torch.distributed.checkpoint.default_planner import DefaultSavePlanner, DefaultLoadPlanner
+
+    class BF16LoadPlanner(DefaultLoadPlanner):
+        def transform_tensor(self, read_item: ReadItem, tensor: torch.Tensor):
+
+            if read_item.storage_index.fqn.startswith('state.model'):
+                print('loading dtype', tensor.dtype)
+            return super().transform_tensor(read_item, tensor)
+
+    class BF16SavePlanner(DefaultSavePlanner):
+        def create_local_plan(self) -> SavePlan:
+            plan = super().create_local_plan()
+
+            for item in plan.items:
+                if item.tensor_data is not None and item.index.fqn.startswith('state.model'):
+                    item.tensor_data.properties.dtype = torch.bfloat16
+            return plan
+        def transform_object(self, write_item: WriteItem, object: Any):
+            if isinstance(object, torch.Tensor):
+                if write_item.index.fqn.startswith('state.model'):
+                    assert object.dtype == torch.float32
+                    print('transforming tensor', object.dtype)
+                    return object.to(torch.bfloat16)
+            return super().transform_object(write_item, object)
+
+    
+
+    if fsdp_config is not None:
+        fsdp_config['load_planner'] = BF16LoadPlanner()
+    #     # if 'load_planner' in fsdp_config:
+    #     #     load_planners = list(fsdp_config['load_planner'].items())
+    #     #     if len(load_planners) > 1:
+    #     #         raise ValueError(
+    #     #             'Only one load planner can be specified in the config.',
+    #     #         )
+    #     #     load_planner_name, load_planner_config = load_planners[0]
+    #     #     fsdp_config['load_planner'] = build_load_planner(
+    #     #         load_planner_name,
+    #     #         **load_planner_config,
+    #     #     )
+
+    #     # if 'save_planner' in fsdp_config:
+    #     #     save_planners = list(fsdp_config['save_planner'].items())
+    #     #     if len(save_planners) > 1:
+    #     #         raise ValueError(
+    #     #             'Only one save planner can be specified in the config.',
+    #     #         )
+    #     #     save_planner_name, save_planner_config = save_planners[0]
+    #     #     fsdp_config['save_planner'] = build_save_planner(
+    #     #         save_planner_name,
+    #     #         **save_planner_config,
+    #     #     )
+        fsdp_config['save_planner'] = BF16SavePlanner()
 
     eval_loader_config = train_cfg.eval_loader if train_cfg.eval_loader is not None else train_cfg.eval_loaders
     icl_tasks_config = train_cfg.icl_tasks or train_cfg.icl_tasks_str
