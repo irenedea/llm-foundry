@@ -125,6 +125,8 @@ def _register_model_with_run_id_multiprocess(
         )
         logging.getLogger('composer').setLevel(composer_logging_level)
 
+    raise Exception('test')
+
     # Register model.
     mlflow_logger.register_model_with_run_id(
         model_uri=model_uri,
